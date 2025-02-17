@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Contact Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://source.unsplash.com/1600x900/?technology,abstract') no-repeat center center/cover;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: cyan;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 255, 255, 0.2);
+            width: 90%;
+            max-width: 500px;
+            color: cyan;
+        }
+        input, button {
+            display: block;
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            background: black;
+            color: cyan;
+        }
+        button {
+            background: cyan;
+            color: black;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00cccc;
+        }
+        .contact-list {
+            margin-top: 20px;
+        }
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: black;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0px 2px 5px rgba(0, 255, 255, 0.2);
+            margin-bottom: 10px;
+            color: cyan;
+        }
+        .search-bar {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid cyan;
+            background: black;
+            color: cyan;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Contact Form</h2>
+        <input type="text" id="name" placeholder="Name">
+        <input type="email" id="email" placeholder="Email">
+        <input type="number" id="phone" placeholder="Phone Number">
+        <button onclick="addContact()">Add Contact</button>
+        <input type="text" id="search" class="search-bar" placeholder="Search by name or email" onkeyup="searchContacts()">
+        <div class="contact-list" id="contactList"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadContacts);
+        
+        function addContact() {
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const phone = document.getElementById("phone").value.trim();
+
+            if (!name || !email || !phone) {
+                alert("All fields are required!");
+                return;
+            }
+
+            const contact = { name, email, phone };
+            let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+            contacts.push(contact);
+            localStorage.setItem("contacts", JSON.stringify(contacts));
+            displayContacts();
+            
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("phone").value = "";
+        }
+        
+        function displayContacts() {
+            const contactList = document.getElementById("contactList");
+            contactList.innerHTML = "";
+            let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+            
+            contacts.forEach((contact, index) => {
+                const contactItem = document.createElement("div");
+                contactItem.classList.add("contact-item");
+                contactItem.innerHTML = `
+                    <span>${contact.name} - ${contact.email} - ${contact.phone}</span>
+                    <div>
+                        <button onclick="editContact(${index})">Edit</button>
+                        <button onclick="deleteContact(${index})">Delete</button>
+                    </div>
+                `;
+                contactList.appendChild(contactItem);
+            });
+        }
+
+        function deleteContact(index) {
+            let contacts = JSON.parse(localStorage.getItem("contacts"));
+            contacts.splice(index, 1);
+            localStorage.setItem("contacts", JSON.stringify(contacts));
+            displayContacts();
+        }
+
+        function editContact(index) {
+            let contacts = JSON.parse(localStorage.getItem("contacts"));
+            const contact = contacts[index];
+            
+            document.getElementById("name").value = contact.name;
+            document.getElementById("email").value = contact.email;
+            document.getElementById("phone").value = contact.phone;
+
+            deleteContact(index);
+        }
+
+        function loadContacts() {
+            displayContacts();
+        }
+
+        function searchContacts() {
+            const query = document.getElementById("search").value.toLowerCase();
+            let contacts = JSON.parse(localStorage.getItem("contacts")) || [];
+            
+            const filteredContacts = contacts.filter(contact => 
+                contact.name.toLowerCase().includes(query) || 
+                contact.email.toLowerCase().includes(query)
+            );
+            
+            document.getElementById("contactList").innerHTML = "";
+            filteredContacts.forEach((contact, index) => {
+                const contactItem = document.createElement("div");
+                contactItem.classList.add("contact-item");
+                contactItem.innerHTML = `
+                    <span>${contact.name} - ${contact.email} - ${contact.phone}</span>
+                    <div>
+                        <button onclick="editContact(${index})">Edit</button>
+                        <button onclick="deleteContact(${index})">Delete</button>
+                    </div>
+                `;
+                document.getElementById("contactList").appendChild(contactItem);
+            });
+        }
+    </script>
+</body>
+</html>
